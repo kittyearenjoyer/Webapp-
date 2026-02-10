@@ -1,57 +1,57 @@
 import streamlit as st
-import time
-import os
+import random
+import hashlib
 
-# --- UI Setup ---
-st.set_page_config(page_title="Streamlit Log Streamer", layout="wide")
-st.title("📂 Echtzeit Log-Datei Stream")
-st.write("Diese App überwacht die `access.log` und streamt neue Zeilen direkt ins UI.")
+st.set_page_config(page_title="Ashtar-Orakel", page_icon="✨")
 
-LOG_FILE = "access.log"
+st.title("✨ Ashtar-Sheran Orakel")
+st.write("Fiktive, satirische Botschaften aus der galaktischen Föderation.")
 
-# Datei initialisieren, falls nicht vorhanden
-if not os.path.exists(LOG_FILE):
-    with open(LOG_FILE, "w") as f:
-        f.write("--- Log Start ---\n")
+name = st.text_input("Dein Name:")
 
-# --- Der Stream-Container ---
-# Wir erstellen einen leeren Bereich, den wir später füllen
-log_placeholder = st.empty()
+rollen = [
+    "wurde für eine geheime Mission ausgewählt",
+    "trägt einen verborgenen Sternencode in sich",
+    "ist ein inkarniertes Mitglied der Sternenflotte",
+    "steht unter direkter Beobachtung",
+    "fungiert als kosmischer Verbindungspunkt",
+]
 
-def stream_logs():
-    # Wir nutzen eine Liste als Puffer für die letzten X Zeilen
-    log_history = []
-    
-    with open(LOG_FILE, "r") as f:
-        # Zum Ende der Datei springen
-        f.seek(0, os.SEEK_END)
-        
-        while True:
-            line = f.readline()
-            if not line:
-                time.sleep(0.5)  # Kurze Pause, wenn keine neuen Daten da sind
-                continue
-            
-            # Daten-Transformation (unsere "Pipe" Logik)
-            clean_line = line.strip()
-            if clean_line:
-                # Neue Zeile oben hinzufügen
-                log_history.insert(0, f"🕒 {time.strftime('%H:%M:%S')} | {clean_line}")
-                
-                # Nur die letzten 15 Einträge behalten
-                log_history = log_history[:15]
-                
-                # Das UI-Element mit dem neuen Stream-Inhalt überschreiben
-                with log_placeholder.container():
-                    for entry in log_history:
-                        if "ERROR" in entry:
-                            st.error(entry)
-                        elif "WARN" in entry:
-                            st.warning(entry)
-                        else:
-                            st.code(entry)
+mutterschiff = [
+    "Das Mutterschiff, das gleichzeitig in mehreren Dimensionen existiert",
+    "Ein extradimensionales Mutterschiff außerhalb von Raum und Zeit",
+    "Das mehrdimensionale Flaggschiff der Föderation",
+    "Ein Mutterschiff, das parallel durch mehrere Realitäten gleitet",
+    "Die interdimensionale Kommandozentrale der Flotte",
+]
 
-# --- Startknopf ---
-if st.button("Stream starten"):
-    st.info("Überwachung läuft... (Zum Stoppen den Button oben rechts nutzen)")
-    stream_logs()
+aktionen = [
+    "sendet dir verschlüsselte Signale",
+    "bereitet deine Aktivierung vor",
+    "synchronisiert sich mit deinem Bewusstsein",
+    "beobachtet deine Zeitlinie",
+    "kalibriert deine Realität",
+]
+
+ziele = [
+    "um das Gleichgewicht der Erde zu stabilisieren",
+    "zur Vorbereitung auf den ersten Kontakt",
+    "als Teil eines kosmischen Experiments",
+    "um eine verborgene Wahrheit zu enthüllen",
+    "für eine bevorstehende Dimensionsverschiebung",
+]
+
+if st.button("Kosmische Botschaft empfangen"):
+    if name.strip() == "":
+        st.warning("Bitte erst einen Namen eingeben.")
+    else:
+        seed = int(hashlib.sha256(name.encode()).hexdigest(), 16)
+        random.seed(seed)
+
+        text = (
+            f"Nachricht von Ashtar Sheran: {name} {random.choice(rollen)}. "
+            f"{random.choice(mutterschiff)} {random.choice(aktionen)}, "
+            f"{random.choice(ziele)}."
+        )
+
+        st.success(text)
