@@ -1,56 +1,57 @@
 import streamlit as st
 import time
-import random
+import os
 
-if "phase" not in st.session_state:
-    st.session_state.phase = "idle"
-    st.session_state.start_time = 0.0
-    st.session_state.wait_until = 0.0
-    st.session_state.result = None
+# --- UI Setup ---
+st.set_page_config(page_title="Streamlit Log Streamer", layout="wide")
+st.title("📂 Echtzeit Log-Datei Stream")
+st.write("Diese App überwacht die `access.log` und streamt neue Zeilen direkt ins UI.")
 
-st.title("Reaktionszeit-Tester")
+LOG_FILE = "access.log"
 
-name = st.text_input("Name")
+# Datei initialisieren, falls nicht vorhanden
+if not os.path.exists(LOG_FILE):
+    with open(LOG_FILE, "w") as f:
+        f.write("--- Log Start ---\n")
 
-def start_round():
-    delay = random.uniform(2.0, 5.0)
-    st.session_state.wait_until = time.time() + delay
-    st.session_state.phase = "waiting"
-    st.session_state.result = None
+# --- Der Stream-Container ---
+# Wir erstellen einen leeren Bereich, den wir später füllen
+log_placeholder = st.empty()
 
-def register_click():
-    now = time.time()
-    if st.session_state.phase == "waiting":
-        if now < st.session_state.wait_until:
-            st.session_state.phase = "invalid"
-        else:
-            st.session_state.phase = "ready"
-            st.session_state.start_time = now
-    elif st.session_state.phase == "ready":
-        rt = now - st.session_state.start_time
-        st.session_state.result = rt
-        st.session_state.phase = "result"
+def stream_logs():
+    # Wir nutzen eine Liste als Puffer für die letzten X Zeilen
+    log_history = []
+    
+    with open(LOG_FILE, "r") as f:
+        # Zum Ende der Datei springen
+        f.seek(0, os.SEEK_END)
+        
+        while True:
+            line = f.readline()
+            if not line:
+                time.sleep(0.5)  # Kurze Pause, wenn keine neuen Daten da sind
+                continue
+            
+            # Daten-Transformation (unsere "Pipe" Logik)
+            clean_line = line.strip()
+            if clean_line:
+                # Neue Zeile oben hinzufügen
+                log_history.insert(0, f"🕒 {time.strftime('%H:%M:%S')} | {clean_line}")
+                
+                # Nur die letzten 15 Einträge behalten
+                log_history = log_history[:15]
+                
+                # Das UI-Element mit dem neuen Stream-Inhalt überschreiben
+                with log_placeholder.container():
+                    for entry in log_history:
+                        if "ERROR" in entry:
+                            st.error(entry)
+                        elif "WARN" in entry:
+                            st.warning(entry)
+                        else:
+                            st.code(entry)
 
-if st.session_state.phase == "idle":
-    st.button("Start", on_click=start_round)
-    st.write("Klicke Start und warte auf das Signal.")
-
-elif st.session_state.phase == "waiting":
-    st.button("KLICK!", on_click=register_click)
-    if time.time() >= st.session_state.wait_until:
-        st.session_state.phase = "ready"
-        st.session_state.start_time = time.time()
-        st.rerun()
-    st.write("Warte auf das Signal...")
-
-elif st.session_state.phase == "ready":
-    st.button("JETZT KLICKEN!", on_click=register_click)
-    st.success("JETZT!")
-
-elif st.session_state.phase == "invalid":
-    st.error("Zu früh geklickt! Versuch ungültig.")
-    st.button("Neu starten", on_click=lambda: st.session_state.update(phase="idle"))
-
-elif st.session_state.phase == "result":
-    st.success(f"Reaktionszeit: {st.session_state.result:.4f} s")
-    st.button("Neu starten", on_click=lambda: st.session_state.update(phase="idle"))
+# --- Startknopf ---
+if st.button("Stream starten"):
+    st.info("Überwachung läuft... (Zum Stoppen den Button oben rechts nutzen)")
+    stream_logs()
