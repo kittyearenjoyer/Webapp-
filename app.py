@@ -40,8 +40,9 @@ if "result" not in st.session_state:
     st.session_state.result = ["❔", "❔", "❔"]
 
 symbols = ["🍒", "🍋", "🔔", "⭐", "7️⃣"]
+weights = [40, 30, 20, 9, 1]  # Seltene Symbole sind schwerer zu bekommen
 
-st.title("🎰 Mini Slot Maschine")
+st.title("🎰 Slot Maschine")
 
 st.markdown(
     f"<div class='credit-box'>Credits: {st.session_state.credits}</div>",
@@ -53,7 +54,7 @@ slot_display = st.empty()
 
 def animate_spin():
     for _ in range(10):
-        temp = [random.choice(symbols) for _ in range(3)]
+        temp = random.choices(symbols, weights=weights, k=3)
         slot_display.markdown(
             f"<div class='slot-box'>{' '.join(temp)}</div>",
             unsafe_allow_html=True,
@@ -68,7 +69,7 @@ def spin():
     st.session_state.credits -= 1
     animate_spin()
 
-    result = [random.choice(symbols) for _ in range(3)]
+    result = random.choices(symbols, weights=weights, k=3)
     st.session_state.result = result
 
     slot_display.markdown(
