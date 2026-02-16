@@ -40,9 +40,9 @@ if "result" not in st.session_state:
     st.session_state.result = ["❔", "❔", "❔"]
 
 symbols = ["🍒", "🍋", "🔔", "⭐", "7️⃣"]
-weights = [40, 30, 20, 9, 1]  # Seltene Symbole sind schwerer zu bekommen
+weights = [70, 20, 7, 2, 1]  # Noch stärkere Gewichtung: Gewinne sind deutlich seltener  # Seltene Symbole sind schwerer zu bekommen
 
-st.title("🎰 Slot Maschine")
+st.title("🎰 Mini Slot Maschine")
 
 st.markdown(
     f"<div class='credit-box'>Credits: {st.session_state.credits}</div>",
