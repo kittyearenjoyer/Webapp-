@@ -1,21 +1,48 @@
 import streamlit as st
 import random
 
-st.set_page_config(page_title="Rameen Roast Generator")
+# Initialisierung des Session State
+if "credits" not in st.session_state:
+    st.session_state.credits = 10
 
-name = "Rameen"
+if "result" not in st.session_state:
+    st.session_state.result = ["❔", "❔", "❔"]
 
-roasts = [
-    f"{name} ich lösche deinen DC Server.",
-    f"{name} zerstört Arbeitsplätze.",
-    f"{name} kann meine Eier lecken.",
-    f"{name} ist ein Hurensohn",
-    f"{name}, vibecoden ist scheiße.",
-    f"{name} soll sich ficken gehen.",
-    f"{name} ist zu dumm um Discord Bots zu managen.",
-]
+symbols = ["🍒", "🍋", "🔔", "⭐", "7️⃣"]
 
-st.title("🔥 Rameen Roast Generator")
+st.title("🎰 Mini Slot Maschine")
 
-if st.button("Roast auslösen"):
-    st.subheader(random.choice(roasts))
+st.write(f"**Credits:** {st.session_state.credits}")
+
+def spin():
+    if st.session_state.credits <= 0:
+        return
+
+    st.session_state.credits -= 1
+    result = [random.choice(symbols) for _ in range(3)]
+    st.session_state.result = result
+
+    # Gewinnlogik
+    if result[0] == result[1] == result[2]:
+        st.session_state.credits += 5
+        st.success("Jackpot! +5 Credits")
+    elif len(set(result)) == 2:
+        st.session_state.credits += 2
+        st.info("Kleiner Gewinn! +2 Credits")
+
+def retry():
+    st.session_state.credits = 10
+    st.session_state.result = ["❔", "❔", "❔"]
+
+# Anzeige der Walzen
+st.markdown(
+    f"<h1 style='text-align: center;'>{' | '.join(st.session_state.result)}</h1>",
+    unsafe_allow_html=True
+)
+
+# Buttons
+if st.session_state.credits > 0:
+    st.button("Spin", on_click=spin)
+else:
+    st.error("Keine Credits mehr!")
+    st.button("Retry (neu starten)", on_click=retry)
